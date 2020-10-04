@@ -1,56 +1,50 @@
 
 # Setup
 ## Requirements
-- [AWS Python Client - Boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/comprehend.html?highlight=comprehend)
-- Create new IAM role for Lambda functions with `ComprehendFullAccess` and `AWSLambdaExecute` permission
+- [AWS Serverless Application Model](https://docs.aws.amazon.com/serverless-application-model/index.html) (Basically, `CloudFormation`, but more abstracted / easier)
+    - There's really no "good" way to work on Lambda functions together, so the best I can think of is something using SAM to automate the process of spinning deploying the lambdas
 
-## Notes on Comprehend
+## Docs
 - [Docs on Comprehend (Boto3)](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/comprehend.html?highlight=comprehend#comprehend)
+- [Docs on Comprehend - DetectSentiment](https://docs.aws.amazon.com/comprehend/latest/dg/API_DetectSentiment.html)
+- [Docs on Comprehend - DetectEntities](https://docs.aws.amazon.com/comprehend/latest/dg/API_DetectEntities.html)
+
+# Notes 
 - Looks like Comprehend doesn't aggregate the sentiment / entities, so we may have to do this ourselves.
 
 ```python
-I want to analyze: 
-[
-    "Hey, welcome to this tutorial. How are you doing readers and viewers",
-    "Hey, welcome to this tutorial. How are you doing readers and viewers"
-]
+Example:
+I want to analyze tweets with `Trump` 
 
 Comprehend returns:
 {
   "statusCode": 200,
   "body": {
+    "tweets": [
+      "@AmandiOnAir Trump is a psychopath getting away with murder. He killing people right in front of our eyes."
+    ],
     "sentiment": {
       "ResultList": [
         {
           "Index": 0,
-          "Sentiment": "NEUTRAL",
+          "Sentiment": "NEGATIVE",
           "SentimentScore": {
-            "Positive": 0.36617422103881836,
-            "Negative": 0.007702559698373079,
-            "Neutral": 0.6261109709739685,
-            "Mixed": 0.000012214969501656014
-          }
-        },
-        {
-          "Index": 1,
-          "Sentiment": "NEUTRAL",
-          "SentimentScore": {
-            "Positive": 0.36617422103881836,
-            "Negative": 0.007702559698373079,
-            "Neutral": 0.6261109709739685,
-            "Mixed": 0.000012214969501656014
+            "Positive": 0.00022572008310817182,
+            "Negative": 0.9855265617370605,
+            "Neutral": 0.014246664009988308,
+            "Mixed": 0.0000010548167210799875
           }
         }
       ],
       "ErrorList": [],
       "ResponseMetadata": {
-        "RequestId": "c81e0ae1-3765-4eb6-a460-6d57e775bff8",
+        "RequestId": "66dba76a-f0f2-477c-b91f-309528abd9b0",
         "HTTPStatusCode": 200,
         "HTTPHeaders": {
-          "x-amzn-requestid": "c81e0ae1-3765-4eb6-a460-6d57e775bff8",
+          "x-amzn-requestid": "66dba76a-f0f2-477c-b91f-309528abd9b0",
           "content-type": "application/x-amz-json-1.1",
-          "content-length": "381",
-          "date": "Sun, 04 Oct 2020 20:18:10 GMT"
+          "content-length": "209",
+          "date": "Sun, 04 Oct 2020 22:38:39 GMT"
         },
         "RetryAttempts": 0
       }
@@ -59,22 +53,33 @@ Comprehend returns:
       "ResultList": [
         {
           "Index": 0,
-          "Entities": []
-        },
-        {
-          "Index": 1,
-          "Entities": []
+          "Entities": [
+            {
+              "Score": 0.5656334757804871,
+              "Type": "ORGANIZATION",
+              "Text": "@AmandiOnAir",
+              "BeginOffset": 0,
+              "EndOffset": 12
+            },
+            {
+              "Score": 0.9450738430023193,
+              "Type": "PERSON",
+              "Text": "Trump",
+              "BeginOffset": 13,
+              "EndOffset": 18
+            }
+          ]
         }
       ],
       "ErrorList": [],
       "ResponseMetadata": {
-        "RequestId": "5b60b4ff-f2cb-4b15-a542-097764af2bb2",
+        "RequestId": "9d69f7e4-04bc-41ec-ba6c-e35ecc795434",
         "HTTPStatusCode": 200,
         "HTTPHeaders": {
-          "x-amzn-requestid": "5b60b4ff-f2cb-4b15-a542-097764af2bb2",
+          "x-amzn-requestid": "9d69f7e4-04bc-41ec-ba6c-e35ecc795434",
           "content-type": "application/x-amz-json-1.1",
-          "content-length": "83",
-          "date": "Sun, 04 Oct 2020 20:18:10 GMT"
+          "content-length": "252",
+          "date": "Sun, 04 Oct 2020 22:38:39 GMT"
         },
         "RetryAttempts": 0
       }
