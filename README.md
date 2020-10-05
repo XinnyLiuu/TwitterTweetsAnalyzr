@@ -1,8 +1,13 @@
 
 # Setup
+## Sys Diagram
+![diagram](aws.png)
+
 ## Requirements
 - [AWS Serverless Application Model](https://docs.aws.amazon.com/serverless-application-model/index.html) (Basically, `CloudFormation`, but more abstracted / easier)
-    - There's really no "good" way to work on Lambda functions together, so the best I can think of is something using SAM to automate the process of spinning deploying the lambdas
+    - There's really no "good" way to work on this together, so the best I can think of is using SAM to spin up the resources we got
+    - Set up `SAM CLI` and run `deploy.sh` under the serverless directory
+    - Once all the inital resources are set up, go to `Amplify`, find the app and build it (just this once, future builds are auto deployed)
 
 ## Docs
 - [Docs on Comprehend (Boto3)](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/comprehend.html?highlight=comprehend#comprehend)

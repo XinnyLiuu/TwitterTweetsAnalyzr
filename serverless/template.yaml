@@ -12,6 +12,20 @@ Globals:
                 SECRET: Bg8a3o80jHf1gqX0OuK77owBSLpaYYhayhysHYgGOfj6Oma38S
 
 Resources:
+    TwitterTweetsAmplifyApp:
+        Type: AWS::Amplify::App
+        Properties:
+            Name: TwitterTweetsAnalysis
+            OauthToken: 263f7dd403742bde98a3eadc48222522eab1e757
+            Repository: https://github.com/XinnyLiuu/twitter-tweets-analysis
+    
+    TwitterTweetsAmplifyBranch:
+        Type: AWS::Amplify::Branch
+        Properties:
+            BranchName: sandbox
+            AppId: !GetAtt TwitterTweetsAmplifyApp.AppId
+            EnableAutoBuild: true
+    
     AnalyzeTweetsFunction:
         Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
         Properties:
@@ -36,9 +50,15 @@ Outputs:
     AnalyzeTweetsApi:
         Description: "API Gateway endpoint URL for Prod stage for Analyze Tweets function"
         Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/analyze/tweets"
+
     AnalyzeTweetsFunction:
         Description: "Analyze Tweets Lambda Function ARN"
         Value: !GetAtt AnalyzeTweetsFunction.Arn
+
     AnalyzeTweetsFunctionIamRole:
         Description: "Implicit IAM Role created for Analyze Tweets function"
         Value: !GetAtt AnalyzeTweetsFunction.Arn
+
+    TwitterTweetsAmplifyDomain:
+        Description: "Domain for deployed app"
+        Value: !GetAtt TwitterTweetsAmplifyApp.DefaultDomain
