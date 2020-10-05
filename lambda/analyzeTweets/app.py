@@ -10,7 +10,7 @@ def lambda_handler(event, context):
     Analyze tweets (with search term) with Comprehend
     """
     # Get search term from input (ignoring all retweets)
-    term = "{} -filter:retweets".format(event["term"])
+    term = "{} -filter:retweets".format(event["body"])
 
     # Fetch tweets with term
     auth = tweepy.AppAuthHandler(
@@ -44,9 +44,12 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': {
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        'body': json.dumps({
             "tweets": recent_tweets,
             "sentiment": sentiment,
             "entities": entities
-        }
+        })
     }

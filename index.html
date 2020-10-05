@@ -1,10 +1,44 @@
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twitter Tweets Analysis</title>
 </head>
+<script>
+    // Lambda function endpoint
+    const ANALYZE_URL = `https://a3xvdll619.execute-api.us-east-1.amazonaws.com/Prod`;
+
+    async function analyzeTweets() {
+        // Build data
+        const data = {
+            "term": document.querySelector("#term").value
+        };
+
+        alert(data);
+
+        // try {
+        //     const resp = await fetch(ANALYZE_URL, {
+        //         method: "POST",
+        //         headers: {
+        //             "Content-Type": "application/json"
+        //         },
+        //         body: JSON.stringify(data)
+        //     }).json()
+
+
+        // } catch (e) {
+        //     alert(e);
+        // }
+    }
+</script>
+
 <body>
-    
+    <label for="term">Search Tweets:</label>
+    <input type="text" id="term" name="term">
+    <input type="button" value="Search" onclick="analyzeTweets()">
+
+    <div id="output"></div>
 </body>
+
 </html>
