@@ -12,24 +12,23 @@
     async function analyzeTweets() {
         // Build data
         const data = {
-            "term": document.querySelector("#term").value
+            "term": document.querySelector("#term").value.trim()
         };
 
-        console.log(data);
+        try {
+            const resp = await fetch(ANALYZE_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            }).json()
 
-        // try {
-        //     const resp = await fetch(ANALYZE_URL, {
-        //         method: "POST",
-        //         headers: {
-        //             "Content-Type": "application/json"
-        //         },
-        //         body: JSON.stringify(data)
-        //     }).json()
-
-
-        // } catch (e) {
-        //     alert(e);
-        // }
+            document.querySelector("output").innerHTML = resp;
+        } catch (e) {
+            alert("Error with request");
+            console.log(e);
+        }
     }
 </script>
 
