@@ -7,24 +7,21 @@
 </head>
 <script>
     // Lambda function endpoint
-    const ANALYZE_URL = `https://a3xvdll619.execute-api.us-east-1.amazonaws.com/Prod`;
+    const ANALYZE_URL = `https://a3xvdll619.execute-api.us-east-1.amazonaws.com/Prod/analyze/tweets`;
 
     async function analyzeTweets() {
-        // Build data
-        const data = {
-            "term": document.querySelector("#term").value.trim()
-        };
-
         try {
             const resp = await fetch(ANALYZE_URL, {
                 method: "POST",
+                mode: "cors",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(data)
-            }).json()
+                body: document.querySelector("#term").value.trim()
+            });
 
-            document.querySelector("output").innerHTML = resp;
+            const json = await resp.json();
+            console.log(json);
         } catch (e) {
             alert("Error with request");
             console.log(e);
