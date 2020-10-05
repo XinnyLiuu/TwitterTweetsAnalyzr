@@ -13,15 +13,12 @@
         try {
             const resp = await fetch(ANALYZE_URL, {
                 method: "POST",
-                mode: "cors",
-                headers: {
-                    "Content-Type": "application/json"
-                },
                 body: document.querySelector("#term").value.trim()
             });
 
             const json = await resp.json();
-            console.log(json);
+
+            document.querySelector("#output").innerHTML = JSON.stringify(json);
         } catch (e) {
             alert("Error with request");
             console.log(e);
