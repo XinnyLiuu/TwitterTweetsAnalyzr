@@ -16,7 +16,7 @@ Resources:
         Type: AWS::Amplify::App
         Properties:
             Name: TwitterTweetsAnalysis
-            OauthToken: 263f7dd403742bde98a3eadc48222522eab1e757
+            OauthToken: <AMPLIFY_TOKEN>
             Repository: https://github.com/XinnyLiuu/twitter-tweets-analysis
     
     TwitterTweetsAmplifyBranch:
