@@ -7,3 +7,4 @@ s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-16y62ke5wvr8x"
 s3_prefix = "twitter-tweets-analysis"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
