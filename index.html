@@ -2,7 +2,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Twitter Tweets Analysis</title>
 </head>
 <script>
@@ -24,14 +24,15 @@
             console.log(e);
         }
     }
+
 </script>
 
 <body>
-    <label for="term">Search Tweets:</label>
-    <input type="text" id="term" name="term">
-    <input type="button" value="Search" onclick="analyzeTweets()">
+<label for="term">Search Tweets:</label>
+<input id="term" name="term" type="text">
+<input onclick="analyzeTweets()" type="button" value="Search">
 
-    <div id="output"></div>
+<div id="output"></div>
 </body>
 
 </html>
