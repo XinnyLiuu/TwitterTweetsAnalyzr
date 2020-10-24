@@ -35,14 +35,14 @@ Resources:
   AnalyzeTweetsFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: "AnalyzeTweets"
       CodeUri: analyzeTweets/
-      Handler: app.lambda_handler
+      Handler: lambda.lambda_handler
       Runtime: python3.8
       Policies:
-        # Give permission for Comprehend + Lambda + Neptune
+        # Give permission for Comprehend + Lambda + VPCs
         - ComprehendFullAccess
-        - AWSLambdaExecute
-        - NeptuneFullAccess
+        - AWSLambdaFullAccess
         - AmazonVPCFullAccess
       Events:
         AnalyzeTweets:
@@ -50,6 +50,19 @@ Resources:
           Properties:
             Path: /analyze/tweets
             Method: post
+
+  QueryNeptuneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "QueryNeptune"
+      CodeUri: queryNeptune/
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      Policies:
+        # Give permission for Lambda + Neptune + VPC
+        - AWSLambdaFullAccess
+        - NeptuneFullAccess
+        - AmazonVPCFullAccess
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -60,6 +73,10 @@ Outputs:
   AnalyzeTweetsFunction:
     Description: "Analyze Tweets Lambda Function ARN"
     Value: !GetAtt AnalyzeTweetsFunction.Arn
+
+  QueryNeptuneFunction:
+    Description: "Query Neptune with Entities extraced from Comprehend"
+    Value: !GetAtt QueryNeptuneFunction.Arn
 
   AnalyzeTweetsFunctionIamRole:
     Description: "Implicit IAM Role created for Analyze Tweets function"

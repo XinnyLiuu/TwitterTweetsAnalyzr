@@ -3,8 +3,6 @@ import os
 
 import boto3
 import tweepy
-from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
-from gremlin_python.structure.graph import Graph
 
 
 def get_tweets(term: str, result: list) -> list:
@@ -22,7 +20,7 @@ def get_tweets(term: str, result: list) -> list:
                 q=f"{term} -filter:retweets",  # Ignore retweets
                 lang="en",
                 result_type="recent",
-                count=5,
+                count=1,
                 tweet_mode="extended"
             )
     ):
@@ -48,7 +46,7 @@ def get_tweets(term: str, result: list) -> list:
 
 def get_comprehend_analysis(term: str, tweets: list, result: list):
     """
-    Gets analysis from Comprehend using boto3
+    Gets analysis from Comprehend
     Returns all entities extracted from tweets
     """
     all_entities = set()
@@ -94,7 +92,7 @@ def get_comprehend_analysis(term: str, tweets: list, result: list):
             })
 
             # Ignore twitter handles and quantity, date
-            if "@" not in entity and type != "QUANTITY" and type != "DATE":
+            if "@" not in entity and type != "QUANTITY" and type != "DATE" and entity != term:
                 all_entities.add(entity)
 
         result[index]["entities"] = output
@@ -102,30 +100,29 @@ def get_comprehend_analysis(term: str, tweets: list, result: list):
     return all_entities
 
 
-def add_to_neptune(entities: list):
+def invoke_neptune_lambda(term: str, entities: list):
     """
-    Creates a new node in Neptune if one does not exist and adds all entities to it
+    Invokes the "QueryNeptune" lambda function
     """
-    print(entities)
+    client = boto3.client("lambda")
 
-    graph = Graph()
-    conn = DriverRemoteConnection("wss://test-instance-1.c6w4fir6wswm.us-east-1.neptune.amazonaws.com:8182/gremlin",
-                                  "g")
-    g = graph.traversal().withRemote(conn)
-
-    print(g.V().toList())
-    conn.close()
+    client.invoke(
+        FunctionName="QueryNeptune",
+        InvocationType="Event",
+        Payload=json.dumps({
+            "term": term,
+            "entities": entities
+        })
+    )
 
 
 def lambda_handler(event, context):
-    """
-    Analyze tweets (with search term) with Comprehend
-    """
+    term = event["body"]
     result = []
 
-    tweets = get_tweets(event["body"], result)
-    entities = get_comprehend_analysis(event["body"], tweets, result)
-    add_to_neptune(entities)
+    tweets = get_tweets(term, result)
+    entities = get_comprehend_analysis(term, tweets, result)
+    invoke_neptune_lambda(term, list(entities))
 
     return {
         'statusCode': 200,
