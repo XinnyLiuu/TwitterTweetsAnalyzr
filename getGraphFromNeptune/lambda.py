@@ -15,7 +15,7 @@ def get_graph(term: str):
 
     g = graph.traversal().withRemote(connection)
 
-    entities = g.V().has("term", "value", "Trump").out("has_entity").valueMap(True).toList()
+    entities = g.V().has("term", "value", term.upper()).out("has_entity").valueMap(True).toList()
     connection.close()
 
     result = []
@@ -35,7 +35,7 @@ def get_graph(term: str):
 
 
 def lambda_handler(event, context):
-    entities = get_graph("")
+    entities = get_graph(event["body"])
 
     return {
         "statusCode": 200,

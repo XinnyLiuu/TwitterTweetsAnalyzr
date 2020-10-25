@@ -82,7 +82,7 @@ def get_comprehend_analysis(term: str, tweets: list, result: list):
 
         for e in data["Entities"]:
             score = e["Score"]
-            entity = e["Text"]
+            entity = e["Text"].strip()
             type = e["Type"]
 
             output.append({
@@ -92,7 +92,7 @@ def get_comprehend_analysis(term: str, tweets: list, result: list):
             })
 
             # Ignore twitter handles and quantity, date
-            if "@" not in entity and type != "QUANTITY" and type != "DATE" and entity != term:
+            if "@" not in entity and type != "QUANTITY" and type != "DATE" and entity.upper() != term.upper():
                 all_entities.add(entity)
 
         result[index]["entities"] = output
@@ -110,14 +110,14 @@ def invoke_neptune_lambda(term: str, entities: list):
         FunctionName="AddTermToNeptune",
         InvocationType="Event",
         Payload=json.dumps({
-            "term": term,
+            "term": term.upper(),  # Make it upper cased to keep it unique. Pokemon vs pokemon
             "entities": entities
         })
     )
 
 
 def lambda_handler(event, context):
-    term = event["body"]
+    term = event["body"].strip()
     result = []
 
     tweets = get_tweets(term, result)

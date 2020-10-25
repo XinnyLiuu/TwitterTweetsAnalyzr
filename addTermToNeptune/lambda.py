@@ -25,8 +25,6 @@ def create_vertices(term: str, entities: list):
 
         g.V(term_vertex).addE("has_entity").to(entity_vertex).iterate()
 
-    print(g.V().toList())
-
     connection.close()
 
 

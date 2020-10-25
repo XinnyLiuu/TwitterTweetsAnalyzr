@@ -18,12 +18,23 @@
     <script>
         // Take the user search term and get back comprehend results
         async function analyzeTweets() {
+            // Clear existing graph / output if any
+            document.querySelector("#output").innerHTML = "";
+            document.querySelector("#graph").innerHTML = "";
+
+            const term = document.querySelector("#term").value.trim();
+
+            if (!term) {
+                alert("No blanks");
+                return;
+            }
+
             const ANALYZE_URL = `https://97akk4n2mg.execute-api.us-east-1.amazonaws.com/Prod/analyze`;
 
             try {
                 const resp = await fetch(ANALYZE_URL, {
                     method: "POST",
-                    body: document.querySelector("#term").value.trim()
+                    body: term
                 });
 
                 const json = await resp.json();
@@ -33,6 +44,11 @@
                 alert("Error with request");
                 console.log(e);
             }
+
+            // Show graph in 1 second
+            setTimeout(() => {
+                showGraph()
+            }, 1000);
         }
 
         // Build graph for Neptune
@@ -44,16 +60,27 @@
 
         // Build the graph with vis.js
         async function showGraph() {
+            const term = document.querySelector("#term").value.trim();
+
+            if (!term) {
+                alert("No blanks");
+                return;
+            }
+
             const GET_GRAPH_URL = `https://97akk4n2mg.execute-api.us-east-1.amazonaws.com/Prod/neptune`;
 
             try {
-                const resp = await fetch(GET_GRAPH_URL);
+                const resp = await fetch(GET_GRAPH_URL, {
+                    method: "POST",
+                    body: term
+                });
+
                 const entities = await resp.json();
 
                 // Hardcoded for now, the query to aws returns all of the entities from Neptune for "Pokemon"
                 const nodes = new vis.DataSet([{
                     id: 0,
-                    label: "Pokemon",
+                    label: document.querySelector("#term").value.trim(),
                     color: {
                         color: "red"
                     }
@@ -91,8 +118,6 @@
                 console.log(e);
             }
         }
-
-        showGraph();
     </script>
 </body>
 
