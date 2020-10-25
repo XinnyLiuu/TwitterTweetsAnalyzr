@@ -22,6 +22,7 @@ Resources:
       Handler: lambda.lambda_handler
       Runtime: python3.8
       Policies:
+        # Give permission for Comprehend + Lambda + VPCs
         - ComprehendFullAccess
         - AWSLambdaFullAccess
         - AmazonVPCFullAccess
@@ -40,13 +41,14 @@ Resources:
       Handler: lambda.lambda_handler
       Runtime: python3.8
       Policies:
+        # Give permission for Lambda + Neptune + VPCs
         - AWSLambdaFullAccess
         - NeptuneFullAccess
         - AmazonVPCFullAccess
       VpcConfig:
-        SecurityGroupIds:
+        SecurityGroupIds: # Look for your default security group 'console -> VPC -> Security Groups'
           - sg-5c705962
-        SubnetIds:
+        SubnetIds: # Look for your default security group 'console -> VPC -> Subnets'
           - subnet-0854ad39
           - subnet-3ab6d934
           - subnet-3b20901a
@@ -62,13 +64,14 @@ Resources:
       Handler: lambda.lambda_handler
       Runtime: python3.8
       Policies:
+        # Give permission for Lambda + Neptune + VPCs
         - AWSLambdaFullAccess
         - NeptuneFullAccess
         - AmazonVPCFullAccess
       VpcConfig:
-        SecurityGroupIds:
+        SecurityGroupIds: # Look for your default security group 'console -> VPC -> Security Groups'
           - sg-5c705962
-        SubnetIds:
+        SubnetIds: # Look for your default security group 'console -> VPC -> Subnets'
           - subnet-0854ad39
           - subnet-3ab6d934
           - subnet-3b20901a
@@ -86,14 +89,14 @@ Resources:
     Type: AWS::Neptune::DBCluster
     Properties:
       VpcSecurityGroupIds:
-        - sg-5c705962
+        - sg-5c705962 # Look for your default security group 'console -> VPC -> Security Groups'
 
   TweetsEntitiesNeptuneInstance:
     Type: AWS::Neptune::DBInstance
     Properties:
       DBClusterIdentifier:
         Ref: TweetsEntitiesNeptuneCluster
-      DBInstanceClass: db.t3.medium
+      DBInstanceClass: db.t3.medium # Smallest available instance
 
 Outputs:
   AnalyzeTweetsEndpoint:
