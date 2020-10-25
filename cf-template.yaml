@@ -1,0 +1,135 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Twitter Tweets Analysis
+Globals:
+  Function:
+    Timeout: 3
+    Environment:
+      Variables:
+        NEPTUNE_ENDPOINT:
+          Fn::GetAtt:
+            - TweetsEntitiesNeptuneInstance
+            - Endpoint
+        KEY: hpAYD8Shnb2B2OHnCEUxQRSHu
+        SECRET: Bg8a3o80jHf1gqX0OuK77owBSLpaYYhayhysHYgGOfj6Oma38S
+
+Resources:
+  AnalyzeTweetsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AnalyzeTweets
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-195t7n37bpi7c/twitter-tweets-analysis/fc24fcef2b740352cfef11cf989aad79
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      Policies:
+        - ComprehendFullAccess
+        - AWSLambdaFullAccess
+        - AmazonVPCFullAccess
+      Events:
+        AnalyzeTweets:
+          Type: Api
+          Properties:
+            Path: /analyze
+            Method: post
+
+  AddTermToNeptuneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AddTermToNeptune
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-195t7n37bpi7c/twitter-tweets-analysis/5e44609b09ef07bdc537f7c882e69dc5
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      Policies:
+        - AWSLambdaFullAccess
+        - NeptuneFullAccess
+        - AmazonVPCFullAccess
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-5c705962
+        SubnetIds:
+          - subnet-0854ad39
+          - subnet-3ab6d934
+          - subnet-3b20901a
+          - subnet-8ab401ec
+          - subnet-d054e28f
+          - subnet-e2c287af
+
+  GetGraphFromNeptuneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetGraphFromNeptune
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-195t7n37bpi7c/twitter-tweets-analysis/af5bec634dc1a6c93ade98e27498a6bf
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      Policies:
+        - AWSLambdaFullAccess
+        - NeptuneFullAccess
+        - AmazonVPCFullAccess
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-5c705962
+        SubnetIds:
+          - subnet-0854ad39
+          - subnet-3ab6d934
+          - subnet-3b20901a
+          - subnet-8ab401ec
+          - subnet-d054e28f
+          - subnet-e2c287af
+      Events:
+        GetGraphFromNeptune:
+          Type: Api
+          Properties:
+            Path: /neptune
+            Method: post
+
+  TweetsEntitiesNeptuneCluster:
+    Type: AWS::Neptune::DBCluster
+    Properties:
+      VpcSecurityGroupIds:
+        - sg-5c705962
+
+  TweetsEntitiesNeptuneInstance:
+    Type: AWS::Neptune::DBInstance
+    Properties:
+      DBClusterIdentifier:
+        Ref: TweetsEntitiesNeptuneCluster
+      DBInstanceClass: db.t3.medium
+
+Outputs:
+  AnalyzeTweetsEndpoint:
+    Description: Endpoint for analyzing tweets
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/analyze
+
+  GetGraphFromNeptuneEndpoint:
+    Description: Endpoint for retrieving data from neptune to build a graph
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/neptune
+
+  AnalyzeTweetsFunction:
+    Description: Analyze Tweets Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+        - AnalyzeTweetsFunction
+        - Arn
+
+  AddTermToNeptuneFunction:
+    Description: Creates vertices for a term and its entities in Neptune
+    Value:
+      Fn::GetAtt:
+        - AddTermToNeptuneFunction
+        - Arn
+
+  GetGraphFromNeptuneFunction:
+    Description: Gets all entities that are related to a term from Neptune
+    Value:
+      Fn::GetAtt:
+        - GetGraphFromNeptuneFunction
+        - Arn
+
+  TweetsEntitiesNeptuneInstanceEndpoint:
+    Description: Neptune cluster that contains the term and its entities
+    Value:
+      Fn::GetAtt:
+        - TweetsEntitiesNeptuneInstance
+        - Endpoint
