@@ -20,7 +20,7 @@ def get_tweets(term: str, result: list) -> list:
                 q=f"{term} -filter:retweets",  # Ignore retweets
                 lang="en",
                 result_type="recent",
-                count=1,
+                count=5,
                 tweet_mode="extended"
             )
     ):

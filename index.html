@@ -4,35 +4,96 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Twitter Tweets Analysis</title>
+    <script src="https://unpkg.com/vis-network@8.4.1/dist/vis-network.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/vis-network@8.4.1/dist/dist/vis-network.min.css">
 </head>
-<script>
-    // Lambda function endpoint
-    const ANALYZE_URL = `https://a3xvdll619.execute-api.us-east-1.amazonaws.com/Prod/analyze/tweets`;
-
-    async function analyzeTweets() {
-        try {
-            const resp = await fetch(ANALYZE_URL, {
-                method: "POST",
-                body: document.querySelector("#term").value.trim()
-            });
-
-            const json = await resp.json();
-
-            document.querySelector("#output").innerHTML = JSON.stringify(json);
-        } catch (e) {
-            alert("Error with request");
-            console.log(e);
-        }
-    }
-
-</script>
 
 <body>
-<label for="term">Search Tweets:</label>
-<input id="term" name="term" type="text">
-<input onclick="analyzeTweets()" type="button" value="Search">
+    <label for="term">Search Tweets:</label>
+    <input id="term" name="term" type="text">
+    <input onclick="analyzeTweets()" type="button" value="Search">
 
-<div id="output"></div>
+    <div id="output"></div>
+    <div id="graph"></div>
+    <script>
+        // Take the user search term and get back comprehend results
+        async function analyzeTweets() {
+            const ANALYZE_URL = `https://97akk4n2mg.execute-api.us-east-1.amazonaws.com/Prod/analyze`;
+
+            try {
+                const resp = await fetch(ANALYZE_URL, {
+                    method: "POST",
+                    body: document.querySelector("#term").value.trim()
+                });
+
+                const json = await resp.json();
+
+                document.querySelector("#output").innerHTML = JSON.stringify(json);
+            } catch (e) {
+                alert("Error with request");
+                console.log(e);
+            }
+        }
+
+        // Build graph for Neptune
+        function startGraph(data) {
+            const container = document.querySelector("#graph");
+            const options = {};
+            new vis.Network(container, data, options);
+        }
+
+        // Build the graph with vis.js
+        async function showGraph() {
+            const GET_GRAPH_URL = `https://97akk4n2mg.execute-api.us-east-1.amazonaws.com/Prod/neptune`;
+
+            try {
+                const resp = await fetch(GET_GRAPH_URL);
+                const entities = await resp.json();
+
+                // Hardcoded for now, the query to aws returns all of the entities from Neptune for "Pokemon"
+                const nodes = new vis.DataSet([{
+                    id: 0,
+                    label: "Pokemon",
+                    color: {
+                        color: "red"
+                    }
+                }]);
+
+                const edges = new vis.DataSet([]);
+
+                for (let i = 0; i < entities.length; i++) {
+                    const entity = entities[i];
+                    const entityNode = {
+                        id: i + 1,
+                        label: entity.value
+                    };
+
+                    nodes.add(entityNode);
+                    edges.add({
+                        from: entityNode.id,
+                        to: 0,
+                        arrows: "from",
+                        color: {
+                            color: "red"
+                        }
+                    });
+                }
+
+                const nodesView = new vis.DataView(nodes);
+                const edgesView = new vis.DataView(edges);
+
+                startGraph({
+                    nodes: nodesView,
+                    edges: edgesView
+                });
+            } catch (e) {
+                alert("Error building graph");
+                console.log(e);
+            }
+        }
+
+        showGraph();
+    </script>
 </body>
 
 </html>

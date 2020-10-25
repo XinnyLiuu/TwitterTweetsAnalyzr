@@ -11,20 +11,20 @@ Globals:
         SECRET: Bg8a3o80jHf1gqX0OuK77owBSLpaYYhayhysHYgGOfj6Oma38S
 
 Resources:
-  ### Amplify ###
-  TwitterTweetsAmplifyApp:
-    Type: AWS::Amplify::App
-    Properties:
-      Name: TwitterTweetsAnalysis
-      OauthToken: 5444f6d73cde38d32c73a18eebfb2502d9b8e785
-      Repository: https://github.com/XinnyLiuu/twitter-tweets-analysis
-
-  TwitterTweetsAmplifyBranch:
-    Type: AWS::Amplify::Branch
-    Properties:
-      BranchName: sandbox
-      AppId: !GetAtt TwitterTweetsAmplifyApp.AppId
-      EnableAutoBuild: true
+#  ### Amplify ###
+#  TwitterTweetsAmplifyApp:
+#    Type: AWS::Amplify::App
+#    Properties:
+#      Name: TwitterTweetsAnalysis
+#      OauthToken: <>
+#      Repository: https://github.com/XinnyLiuu/twitter-tweets-analysis
+#
+#  TwitterTweetsAmplifyBranch:
+#    Type: AWS::Amplify::Branch
+#    Properties:
+#      BranchName: sandbox
+#      AppId: !GetAtt TwitterTweetsAmplifyApp.AppId
+#      EnableAutoBuild: true
 
   ### Lambda ###
   AnalyzeTweetsFunction:
@@ -100,6 +100,6 @@ Outputs:
     Description: "Gets all entities that are related to a term from Neptune"
     Value: !GetAtt GetGraphFromNeptuneFunction.Arn
 
-  TwitterTweetsAmplifyDomain:
-    Description: "Domain for deployed app"
-    Value: !GetAtt TwitterTweetsAmplifyApp.DefaultDomain
+#  TwitterTweetsAmplifyDomain:
+#    Description: "Domain for deployed app"
+#    Value: !GetAtt TwitterTweetsAmplifyApp.DefaultDomain
