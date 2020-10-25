@@ -54,7 +54,11 @@
         // Build graph for Neptune
         function startGraph(data) {
             const container = document.querySelector("#graph");
-            const options = {};
+            const options = {
+                nodes: {
+                    shape: "box"
+                }
+            };
             new vis.Network(container, data, options);
         }
 
@@ -81,8 +85,9 @@
                 const nodes = new vis.DataSet([{
                     id: 0,
                     label: document.querySelector("#term").value.trim(),
-                    color: {
-                        color: "red"
+                    color: "#EF8354",
+                    font: {
+                        color: "white"
                     }
                 }]);
 
@@ -92,7 +97,11 @@
                     const entity = entities[i];
                     const entityNode = {
                         id: i + 1,
-                        label: entity.value
+                        label: entity.value, 
+                        color: "#04A777",
+                        font: {
+                            color: "white"
+                        }
                     };
 
                     nodes.add(entityNode);
@@ -100,8 +109,9 @@
                         from: entityNode.id,
                         to: 0,
                         arrows: "from",
+                        label: "has_entity",
                         color: {
-                            color: "red"
+                            color: "#A3C3D9"
                         }
                     });
                 }
