@@ -7,6 +7,7 @@ Globals:
     Timeout: 3
     Environment:
       Variables:
+        NEPTUNE_ENDPOINT: !GetAtt TweetsEntitiesNeptuneInstance.Endpoint
         KEY: hpAYD8Shnb2B2OHnCEUxQRSHu
         SECRET: Bg8a3o80jHf1gqX0OuK77owBSLpaYYhayhysHYgGOfj6Oma38S
 
@@ -58,6 +59,16 @@ Resources:
         - AWSLambdaFullAccess
         - NeptuneFullAccess
         - AmazonVPCFullAccess
+      VpcConfig:
+        SecurityGroupIds: # Look for your default security group 'console -> VPC -> Security Groups'
+          - "sg-5c705962"
+        SubnetIds: # Look for your default security group 'console -> VPC -> Subnets'
+          - "subnet-0854ad39"
+          - "subnet-3ab6d934"
+          - "subnet-3b20901a"
+          - "subnet-8ab401ec"
+          - "subnet-d054e28f"
+          - "subnet-e2c287af"
 
   GetGraphFromNeptuneFunction:
     Type: AWS::Serverless::Function
@@ -71,6 +82,16 @@ Resources:
         - AWSLambdaFullAccess
         - NeptuneFullAccess
         - AmazonVPCFullAccess
+      VpcConfig:
+        SecurityGroupIds: # Look for your default security group 'console -> VPC -> Security Groups'
+          - "sg-5c705962"
+        SubnetIds: # Look for your default security group 'console -> VPC -> Subnets'
+          - "subnet-0854ad39"
+          - "subnet-3ab6d934"
+          - "subnet-3b20901a"
+          - "subnet-8ab401ec"
+          - "subnet-d054e28f"
+          - "subnet-e2c287af"
       Events:
         GetGraphFromNeptune:
           Type: Api
@@ -78,13 +99,29 @@ Resources:
             Path: /neptune
             Method: post
 
+  ### Neptune ###
+  TweetsEntitiesNeptuneCluster:
+    Type: AWS::Neptune::DBCluster
+    Properties:
+      VpcSecurityGroupIds: [ "sg-5c705962" ] # Look for your default security group 'console -> VPC -> Security Groups'
+
+  TweetsEntitiesNeptuneInstance:
+    Type: AWS::Neptune::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref TweetsEntitiesNeptuneCluster
+      DBInstanceClass: "db.t3.medium" # Smallest available instance
+
 Outputs:
+  #  TwitterTweetsAmplifyDomain:
+  #    Description: "Domain for deployed app"
+  #    Value: !GetAtt TwitterTweetsAmplifyApp.DefaultDomain
+
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  AnalyzeTweetsApi:
+  AnalyzeTweetsEndpoint:
     Description: "Endpoint for analyzing tweets"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/analyze"
 
-  GetGraphFromNeptuneApi:
+  GetGraphFromNeptuneEndpoint:
     Description: "Endpoint for retrieving data from neptune to build a graph"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/neptune"
 
@@ -100,6 +137,6 @@ Outputs:
     Description: "Gets all entities that are related to a term from Neptune"
     Value: !GetAtt GetGraphFromNeptuneFunction.Arn
 
-#  TwitterTweetsAmplifyDomain:
-#    Description: "Domain for deployed app"
-#    Value: !GetAtt TwitterTweetsAmplifyApp.DefaultDomain
+  TweetsEntitiesNeptuneInstanceEndpoint:
+    Description: "Neptune cluster that contains the term and its entities"
+    Value: !GetAtt TweetsEntitiesNeptuneInstance.Endpoint

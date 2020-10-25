@@ -8,4 +8,4 @@ capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 parameter_overrides = "url=\"\""
 s3_prefix = "twitter-tweets-analysis"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-14b7z0p4bsycx"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-195t7n37bpi7c"

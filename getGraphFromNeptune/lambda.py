@@ -1,4 +1,5 @@
 import json
+import os
 
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.structure.graph import Graph
@@ -11,7 +12,7 @@ def get_graph(term: str):
 
     graph = Graph()
     connection = DriverRemoteConnection(
-        'wss://test-instance-1.c6w4fir6wswm.us-east-1.neptune.amazonaws.com:8182/gremlin', 'g')
+        f'wss://{os.environ["NEPTUNE_ENDPOINT"]}:8182/gremlin', 'g')
 
     g = graph.traversal().withRemote(connection)
 
