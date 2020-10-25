@@ -2,11 +2,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Twitter Tweets Analysis
 
-Parameters:
-  url:
-    Type: String
-    Description: Link to HTML
-
 Globals:
   Function:
     Timeout: 3
@@ -48,39 +43,62 @@ Resources:
         AnalyzeTweets:
           Type: Api
           Properties:
-            Path: /analyze/tweets
+            Path: /analyze
             Method: post
 
-  QueryNeptuneFunction:
+  AddTermToNeptuneFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: "QueryNeptune"
-      CodeUri: queryNeptune/
+      FunctionName: "AddTermToNeptune"
+      CodeUri: addTermToNeptune/
       Handler: lambda.lambda_handler
       Runtime: python3.8
       Policies:
-        # Give permission for Lambda + Neptune + VPC
+        # Give permission for Lambda + Neptune + VPCs
         - AWSLambdaFullAccess
         - NeptuneFullAccess
         - AmazonVPCFullAccess
 
+  GetGraphFromNeptuneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "GetGraphFromNeptune"
+      CodeUri: getGraphFromNeptune/
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      Policies:
+        # Give permission for Lambda + Neptune + VPCs
+        - AWSLambdaFullAccess
+        - NeptuneFullAccess
+        - AmazonVPCFullAccess
+      Events:
+        GetGraphFromNeptune:
+          Type: Api
+          Properties:
+            Path: /neptune
+            Method: get
+
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   AnalyzeTweetsApi:
-    Description: "API Gateway endpoint URL for Prod stage for Analyze Tweets function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/analyze/tweets"
+    Description: "Endpoint for analyzing tweets"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/analyze"
+
+  GetGraphFromNeptuneApi:
+    Description: "Endpoint for retrieving data from neptune to build a graph"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/neptune"
 
   AnalyzeTweetsFunction:
     Description: "Analyze Tweets Lambda Function ARN"
     Value: !GetAtt AnalyzeTweetsFunction.Arn
 
-  QueryNeptuneFunction:
-    Description: "Query Neptune with Entities extraced from Comprehend"
-    Value: !GetAtt QueryNeptuneFunction.Arn
+  AddTermToNeptuneFunction:
+    Description: "Creates vertices for a term and its entities in Neptune"
+    Value: !GetAtt AddTermToNeptuneFunction.Arn
 
-  AnalyzeTweetsFunctionIamRole:
-    Description: "Implicit IAM Role created for Analyze Tweets function"
-    Value: !GetAtt AnalyzeTweetsFunction.Arn
+  GetGraphFromNeptuneFunction:
+    Description: "Gets all entities that are related to a term from Neptune"
+    Value: !GetAtt GetGraphFromNeptuneFunction.Arn
 
   TwitterTweetsAmplifyDomain:
     Description: "Domain for deployed app"

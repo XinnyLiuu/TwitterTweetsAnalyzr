@@ -107,7 +107,7 @@ def invoke_neptune_lambda(term: str, entities: list):
     client = boto3.client("lambda")
 
     client.invoke(
-        FunctionName="QueryNeptune",
+        FunctionName="AddTermToNeptune",
         InvocationType="Event",
         Payload=json.dumps({
             "term": term,

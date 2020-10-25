@@ -2,7 +2,7 @@ from gremlin_python.driver.driver_remote_connection import DriverRemoteConnectio
 from gremlin_python.structure.graph import Graph
 
 
-def query_neptune(term: str, entities: list):
+def create_vertices(term: str, entities: list):
     """
     Creates vertices to graph term to entities
     """
@@ -17,19 +17,24 @@ def query_neptune(term: str, entities: list):
     term_vertex = g.V().has("term", "value", term)
     term_vertex = term_vertex.next() if term_vertex.hasNext() else g.addV("term").property("value", term).next()
 
-    # Create a vertex for each and link term to entity
+    # Create an entity vertex for each and link to term
     for e in entities:
-        entity_vertex = g.addV("entity").property("value", e).next()
+        entity_vertex = g.V().has("entity", "value", e)
+        entity_vertex = entity_vertex.next() if entity_vertex.hasNext() else g.addV("entity").property("value",
+                                                                                                       e).next()
+
         g.V(term_vertex).addE("has_entity").to(entity_vertex).iterate()
 
     print(g.V().toList())
+
+    connection.close()
 
 
 def lambda_handler(event, context):
     term = event["term"]
     entities = event["entities"]
 
-    query_neptune(term, entities)
+    create_vertices(term, entities)
 
     return {
         "statusCode": 200
