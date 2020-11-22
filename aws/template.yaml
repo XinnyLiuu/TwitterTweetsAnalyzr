@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Twitter Tweets Analysis
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        NEPTUNE_ENDPOINT: !GetAtt TweetsEntitiesNeptuneInstance.Endpoint
+        KEY: hpAYD8Shnb2B2OHnCEUxQRSHu
+        SECRET: Bg8a3o80jHf1gqX0OuK77owBSLpaYYhayhysHYgGOfj6Oma38S
+
+Parameters:
+  # Look for your default security group id under 'console -> VPC -> Security Groups', take note of the VPC ID
+  SecurityGroupIds:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Default: "sg-1b679b2b"
+  # Look for all subnets associated with VPC ID above 'console -> VPC -> Subnets'
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Default: "subnet-9200b2cd,subnet-e2bd02c3,subnet-f464d592,subnet-ca145487,subnet-afaa6e9e,subnet-1f294311"
+
+Resources:
+  ### Amplify ###
+  TwitterTweetsAmplifyApp:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: TwitterTweetsAnalysis
+      OauthToken: 71f8586649daee0a2abf7b6c30c3ef7fdda7b83f
+      Repository: https://github.com/swen-514-614-fall2020/team-two-repo
+
+  TwitterTweetsAmplifyBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      BranchName: master
+      AppId: !GetAtt TwitterTweetsAmplifyApp.AppId
+      EnableAutoBuild: true
+
+  ### Lambda ###
+  AnalyzeTweetsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: analyzeTweets/
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      Timeout: 3
+      Policies:
+        # Give permission for Comprehend + Lambda + VPCs
+        - ComprehendFullAccess
+        - AWSLambdaFullAccess
+        - AmazonVPCFullAccess
+      Environment:
+        Variables:
+          ADD_TERM_TO_NEPTUNE_ARN:
+            Fn::GetAtt:
+              - AddTermToNeptuneFunction
+              - Arn
+      Events:
+        AnalyzeTweets:
+          Type: Api
+          Properties:
+            Path: /analyze
+            Method: post
+
+  AddTermToNeptuneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: addTermToNeptune/
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      Timeout: 6
+      Policies:
+        # Give permission for Lambda + Neptune + VPCs
+        - AWSLambdaFullAccess
+        - NeptuneFullAccess
+        - AmazonVPCFullAccess
+      VpcConfig:
+        SecurityGroupIds:
+          Ref: SecurityGroupIds
+        SubnetIds:
+          Ref: SubnetIds
+
+  GetGraphFromNeptuneFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: getGraphFromNeptune/
+      Handler: lambda.lambda_handler
+      Runtime: python3.8
+      Timeout: 3
+      Policies:
+        # Give permission for Lambda + Neptune + VPCs
+        - AWSLambdaFullAccess
+        - NeptuneFullAccess
+        - AmazonVPCFullAccess
+      VpcConfig:
+        SecurityGroupIds:
+          Ref: SecurityGroupIds
+        SubnetIds:
+          Ref: SubnetIds
+      Events:
+        GetGraphFromNeptune:
+          Type: Api
+          Properties:
+            Path: /neptune
+            Method: post
+
+  ### Neptune ###
+  TweetsEntitiesNeptuneCluster:
+    Type: AWS::Neptune::DBCluster
+    Properties:
+      VpcSecurityGroupIds:
+        Ref: SecurityGroupIds
+
+  TweetsEntitiesNeptuneInstance:
+    Type: AWS::Neptune::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref TweetsEntitiesNeptuneCluster
+      DBInstanceClass: "db.t3.medium" # Smallest available instance
+
+Outputs:
+  AmplifyAppDomain:
+    Description: "Domain for deployed app on Amplify"
+    Value: !GetAtt TwitterTweetsAmplifyApp.DefaultDomain
+
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  AnalyzeTweetsEndpoint:
+    Description: "Endpoint for analyzing tweets"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/analyze"
+
+  GetGraphFromNeptuneEndpoint:
+    Description: "Endpoint for retrieving data from neptune to build a graph"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/neptune"
+
+  AnalyzeTweetsFunction:
+    Description: "Analyze Tweets Lambda Function ARN"
+    Value: !GetAtt AnalyzeTweetsFunction.Arn
+
+  AddTermToNeptuneFunction:
+    Description: "Creates vertices for a term and its entities in Neptune"
+    Value: !GetAtt AddTermToNeptuneFunction.Arn
+
+  GetGraphFromNeptuneFunction:
+    Description: "Gets all entities that are related to a term from Neptune"
+    Value: !GetAtt GetGraphFromNeptuneFunction.Arn
+
+  TweetsEntitiesNeptuneInstanceEndpoint:
+    Description: "Neptune cluster that contains the term and its entities"
+    Value: !GetAtt TweetsEntitiesNeptuneInstance.Endpoint

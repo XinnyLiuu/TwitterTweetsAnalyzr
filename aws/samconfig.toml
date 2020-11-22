@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "test"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-k1n33ueiukv1"
+s3_prefix = "test"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "SecurityGroupIds=\"sg-1b679b2b\" SubnetIds=\"subnet-9200b2cd,subnet-e2bd02c3,subnet-f464d592,subnet-ca145487,subnet-afaa6e9e,subnet-1f294311\""
