@@ -1,4 +1,4 @@
-# Twitter Tweets Analysis
+# TwitterTweetsAnalyzr 
 
 An application built using several AWS technologies to provide analysis and insight from tweets. Sentiment and Entities are extracted from tweets using [Comprehend](https://aws.amazon.com/comprehend/) and graphed into [Neptune](https://aws.amazon.com/neptune/) for better visualization and persistence.
 
